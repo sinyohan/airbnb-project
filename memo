@@ -1,0 +1,13 @@
+장고에 있는 모든 class들이 가지고 있는 하나의 method가 바로
+__str__ 이라는 method다
+
+models.py 에서 
+
+def __str__(self):
+    return self.name
+
+이렇게 코드를 쓰면
+
+admin페이지에서
+Home > rooms > 이름 
+이렇게 뜨게 할 수 있다
