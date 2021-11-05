@@ -92,4 +92,225 @@ Reiew Model
     지정할 수 있다
 
 
-f"{변수} 그냥str"    이렇게 쓰면 변수와 그냥 str을 같이 쓸 수 있다
+f"{변수} str"    이렇게 쓰면 변수와 그냥 str을 같이 쓸 수 있다
+
+
+5.3 
+def __str__(self):
+    return self.값
+
+이렇게 만들었는데 만약 admin페이지에서 str이 아니라고 에러가뜬다면
+return값을   str(self.값) 이렇게 해서 type을 변경할 수 있다
+
+
+6.0
+
+admin 꾸미기
+
+fields = ("country",)
+
+
+search_fields = ("city","host__username")
+
+검색하는 창이 생기고 도시 이름을 검색하면 그 도시가 뜬다
+만약 저기에 "beds"라 쓰고 방의 수를 검색하면 그거에 맞는
+것이 뜬다 또한 여러개 쓰면 검색창에 여러가지를 검색하면
+그거에 맞는것이 뜬다
+
+"=city" , "^city" , 라는 기능이있고
+
+"host__username"은 등록돼 있는 host의 username을 검색해도
+뜨게 한다는 뜻이다
+
+^ startswith     앞에 있는 것으로 검색해야함 seoul을 seo로 하는건
+가능하지만 oul로 검색하는 건 안됨
+= iexact   정확하게 입력해야 하는것 대신 대소문자 구분안함
+@ search     
+none icontains     정확하게 입력 안해도 됨 대소문자 구분안함
+ 장고는 기본으로 icontains
+
+
+ "host__superhost", list_filter에도 이렇게 넣을수 있다
+
+
+filter_horizontal -> 이거는 manytomany field만 적을수 있음
+
+ex를들면
+filter_horizontal = ("amenity", "facility", "house_rule")
+
+이렇게 적고 add room 에 들어가면 쉽게 추가 할 수 있다
+
+tip! 
+
+alt 누르고 왼쪽 마우스 더블 클릭하면 여러개 선택가능
+
+   ("Last Details", {"fields": ("host")}),
+   이와같이 fields옆에는 무조건 튜플이 들어가야 하는데 
+   저기안에 하나만 넣고 저장하면 ()가 사라지진 않아도 
+   튜플로 인식되지 않는다 그러니 ()안에 하나만 쓸거면
+   마지막에 꼭 , 넣어준다 
+    ("Last Details", {"fields": ("host",)}),
+    이렇게 말이다
+      
+
+fields옆에 
+"classes": ("collapse",) 이것도 넣어줄 수 있다 
+이걸 넣어주면 보였다 안보였다 컨트롤 할 수 있다
+("이름",{"fields":("이름",),"classes":("collapse")})
+
+6.2
+
+ordering = ("")  내가 순서를 정해서 보여줄 수 있다. 
+
+ex) ordering = ("name" , "price")
+
+admin class 안에서 함수는 self와 obj라는 매개변수가 있는데
+self는 클래스를 가르키고 obj는 admin페이지에 등록 돼있는 것을 
+의미한다
+
+admin class 안에서 
+
+    def count_amenities(self, obj):
+        return "Potato"
+이렇게 함수를 만들고 이 함수를 list_display 에 만들어 주면 
+admin페이지에 뜬다 그리고 
+꼭    count_amenities.short_description = "내용"
+이렇게쓰고 다시 실행하면 저기 안에 쓴 내용이 admin페이지에 나온다
+
+
+admin class 안 함수에서 
+obj.amenity.all() 이렇게 쓰면 admin에 등록 돼 있는 것들이 갖고있는
+amenity 모든것이 나온다
+
+obj.amenity.count()
+admin에 등록 돼 있는 각각의 것들이 갖고있는 amenity의 수가 나온다 
+
+7.1 
+ForeignKey,manytomany안에 related_name="" 이라는 것을
+쓸 수 있는데 이건 대상이 나를 찾는 방식이라는 뜻이다
+이해하기 어렵다면 그냥 자신이 속해있는 클래스의 이름을 쓰고 
+뒤에 s를 붙여준다 그리고 무조건 소문자로만 쓴다
+
+
+
+ForeignKey랑 ManytoMany로 연결되어있으면
+자신들과 연결된 것들이 몇개 있지 알 수 있다
+
+예를들면
+RoomAdmin에서  
+ obj.photos.count() 이런식으로 쓰면 자기와 연결된 photo가 
+ 몇개 있는지 알 수 있다.
+
+ 8.0 
+ admin 파일에서 class 매개변수로 UserAdmin이라고 쓴건 내가 
+ 정의한게 아닌 장고에서 기본으로 있는 클래스이다 
+ 그래서 UserAdmin.list_filter 라고 쓰면 기본으로 있는게 나온다
+
+
+ models에서 정의한 함수를 admin파일 list_display 안에 이름을 
+ 써넣어서 사용할수도 있다
+
+
+튜플 () 안에 있는 값들을 다 더하고 / 해서 나눠줄 수도 있다
+ex 
+a = (1+2+3)/3
+
+round(값,소수점 자리수)  이렇게하면 원하는 소수점까지 나태낼수
+있다
+
+related_name은 이렇게 이해한다 모델에서 ForeignKey와 manytomany
+를 써서 어떤거와 연결하면 그 연결된 것은 
+related_name안에 쓴거랑도 연결돼 있는 거다 
+ex)
+reviews models안에 
+room = models.ForeignKey(
+"rooms.Room", related_name="reviews", on_delete=models.CASCADE
+)
+이렇게 썻으면 
+room <--->  등록돼 있는 Room <---> related_name="reviews"
+이런식의 관계가 성립되는 것이다
+
+그래서 이런 코드가 나올 수 있는거다
+    def total_rating(self):
+        all_reviews = self.reviews.all()
+        for review in all_reviews:
+            print(review.rating_average())
+
+
+8.1
+
+from django.utils import timezone
+now = timezone.now().date()
+
+이렇게 하면 현재 시간을 얻어 올 수 있다
+
+함수이름.boolean = True
+
+이렇게 하면 X 마크 check 마크로 표현할 수 있다
+
+
+
+join() 함수
+
+모양
+"".join(list)  
+
+리스트를 합쳐서 문자열로 반환한다
+
+그리고 저기 ""안에 뭔가를 써넣으면 리스트 값과 값 사이에 넣어서
+합친다음 문자열로 반환한다
+
+8.3
+
+photo는 url이 없기 때문에 이상한데로 간다 그래서 장고한테 url을 주고
+photo가 그 url을 갖게한다
+
+media_root는 photo가 업로드 되는 장소를 설정한다
+
+settings에 들어간다음
+MEDIA_ROOT = os.path.join(BASE_DIR, "폴더이름")
+이렇게 써준다 그러면 업로드 하는건 저기로 들어간다
+
+그리고 저 폴더이름은 gitignore에 추가한다
+
+models.ImageField()는 upload_to="" 라는 기능을 갖고 있는데
+그 뜻은 내가 업로드를 하면 그건 내가 설정해둔 폴더 하위에
+폴더를 만들어서 저장을 한다는 뜻이다 
+
+누군가가 media폴더로 가면 uploads 폴더 안을 살펴보길 원한다
+MEDIA_URL 은 MIDEA_ROOT에서 온 MEDIA를 다룬다
+
+MEDIA_URL = "" 이렇게 쓰는데
+저기 "" 안에 뭔가를 쓰면 내가 업로드 한것에 가려면 
+저기에 쓴 것을 거쳐서 가야한다
+"media/" 라고 쓰면 (마지막에 / 꼭 쓴다)
+media/avatars 해야하고 media/room_photos 해야한다
+만일
+"/media/" 라고 쓴다면 이게 제일 앞의 경로로 만들어지게 된다
+ex)  localhost/media/room_photos  이렇게 된다
+
+이것도 settings에 쓴다
+
+image의 url을 쳐서 페이지에서 보이게 하려면
+urls.py에서
+from django.conf import settings 
+from django.conf.urls.static import static 
+하고
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+
+8.5
+obj.file.url 하면 파일의 url을 얻을 수 있다
+
+
+from django.utils.safestring import mark_safe
+장고한테 이건 안전한 거라고 알려주는 것 
+이미지 파일이 나오게 하기!
+쓰는법 
+ex
+mark_safe(f'<img src="{obj.file.url}"/>')
+
+
+ 

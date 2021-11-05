@@ -49,8 +49,10 @@ class HouseRule(AbstractItem):
 
 class Photo(core_models.TimeStampedModel):
     caption = models.CharField(max_length=80, null=True, blank=True)
-    file = models.ImageField(null=True, blank=True)
-    room = models.ForeignKey("Room", on_delete=CASCADE, null=True, blank=True)
+    file = models.ImageField(null=True, blank=True, upload_to="room_photos")
+    room = models.ForeignKey(
+        "Room", on_delete=CASCADE, related_name="photos", null=True, blank=True
+    )
 
     def __str__(self):
         return self.caption
@@ -74,14 +76,35 @@ class Room(core_models.TimeStampedModel):
     check_out = models.TimeField(null=True, blank=True)
     instant_book = models.BooleanField(default=False, null=True, blank=True)
     host = models.ForeignKey(
-        "users.User", on_delete=models.CASCADE, null=True, blank=True
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="rooms",
+        null=True,
+        blank=True,
     )
     room_type = models.ForeignKey(
-        "RoomType", on_delete=models.SET_NULL, blank=True, null=True
+        "RoomType",
+        on_delete=models.SET_NULL,
+        related_name="rooms",
+        blank=True,
+        null=True,
     )
-    amenity = models.ManyToManyField("Amenity", blank=True, null=True)
-    facility = models.ManyToManyField("Facility", blank=True, null=True)
-    house_rule = models.ManyToManyField("HouseRule", blank=True, null=True)
+    amenity = models.ManyToManyField(
+        "Amenity", related_name="rooms", blank=True, null=True
+    )
+    facility = models.ManyToManyField(
+        "Facility", related_name="rooms", blank=True, null=True
+    )
+    house_rule = models.ManyToManyField(
+        "HouseRule", related_name="rooms", blank=True, null=True
+    )
 
     def __str__(self):
         return self.name
+
+    def total_rating(self):
+        all_reviews = self.reviews.all()
+        all_ratings = 0
+        for review in all_reviews:
+            all_ratings += review.rating_average()
+        return all_ratings / len(all_reviews)
